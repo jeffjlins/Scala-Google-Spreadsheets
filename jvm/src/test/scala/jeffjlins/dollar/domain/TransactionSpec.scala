@@ -1,5 +1,6 @@
 package jeffjlins.dollar.domain
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.google.api.services.sheets.v4.SheetsScopes
@@ -38,13 +39,17 @@ class TransactionSpec extends AnyFlatSpec {
 //    val data = transDao.scratchTabData().getRowData.asScala.head.getValues.asScala.head
 //    val eff = data.getUserEnteredValue
 
-    val date = Transaction.extToLocalDate(new ExtendedValue().setNumberValue(42198.0))
+//    val date = Transaction.extToLocalDate(new ExtendedValue().setNumberValue(42198.0))
 
+//    //assert(eff.getNumberValue == 42198)
+//    assert(date.getYear == 2015)
+//    assert(date.getMonth.getValue == 7)
+//    assert(date.getDayOfMonth == 13)
+//    assert(DateTimeFormatter.ofPattern("yyyy-MM").format(date) == "2015-07")
 
-    //assert(eff.getNumberValue == 42198)
-    assert(date.getYear == 2015)
-    assert(date.getMonth.getValue == 7)
-    assert(date.getDayOfMonth == 13)
-    assert(DateTimeFormatter.ofPattern("yyyy-MM").format(date) == "2015-07")
+    val testDate = LocalDate.of(2020, 10, 1)
+    val t1: Transaction = ??? //Transaction()
+    val t2 = t1.modifyField(Transaction.Fields.Date, testDate)
+    assert(t2.date.equals(testDate))
   }
 }

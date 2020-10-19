@@ -6,6 +6,6 @@ project/project
 
 project/target
 
-src/main/resources/credentials.json
+jvm/src/main/resources/credentials.json
 
 tokens

@@ -1,12 +1,14 @@
 package jeffjlins.dollar
 
 import com.google.api.services.sheets.v4.model.{CellFormat, Color, TextFormat}
+import jeffjlins.dollar.util.Utils
 
 class Preferences {
   val credentialsPath = "/credentials.json"
   val tokensDir = "tokens"
 
   val transSheetFileId = "18F_yzi6MuYqmocVZb6EVEHoHjunTgMT0AHKMqDxW760"
+  val financeAppSheetFileId = "1nyET27BtBI_sl8lXjUPLt9b7fC75IJ0t8LcH2m0Uzt8"
 
   val superCategories: Map[String, List[String]] = Map(
     "Expenses" -> ("Primary Expenses" :: "Avoidable Expenses" :: "Unavoidable Expenses" :: "Planned Expenses" :: "Unknown Expenses" :: Nil),
@@ -65,12 +67,7 @@ class Preferences {
   val assetsPanelPrefs: BasicPanelPrefs = BasicPanelPrefs(formats("assets"))
   val detailPanelPrefs: List[DetailPanelPrefs] = DetailPanelPrefs(formats("detail.reallocation"), "Reallocation", true, false) :: DetailPanelPrefs(formats("detail.income"), "Income", true, true) :: DetailPanelPrefs(formats("detail.expenseSummary"), "Expenses", false, true) :: DetailPanelPrefs(formats("detail.expense"), "Expenses", true, false, "Primary Expenses" :: "Avoidable Expenses" :: "Unavoidable Expenses" :: "Planned Expenses" :: "Unknown Expenses" :: Nil) :: Nil
 
-  def clr(hex: String) = {
-    val red = Integer.parseInt(hex.drop(1).take(2), 16).toFloat / Integer.parseInt("FF", 16).toFloat
-    val green = Integer.parseInt(hex.drop(3).take(2), 16).toFloat / Integer.parseInt("FF", 16).toFloat
-    val blue = Integer.parseInt(hex.drop(5).take(2), 16).toFloat / Integer.parseInt("FF", 16).toFloat
-    new Color().setRed(red).setGreen(green).setBlue(blue)
-  }
+  def clr(hex: String): Color = Utils.hexToColor(hex)
 
 }
 

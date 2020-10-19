@@ -79,7 +79,7 @@ case class SummaryPanel(xPlacement: Either[Int, Panel], yPlacement: Either[Int, 
           case "Total Cashflow" => 0
           case "Total Income" => incomeTrans.filter(_.dateMonth.equals(monthIndex(xx))).map(_.amount).sum
           case "Total Expenses" => expenseTrans.filter(_.dateMonth.equals(monthIndex(xx))).map(_.amount).sum
-          case "Total Surplus" => incomeTrans.filter(_.dateMonth.equals(monthIndex(xx))).map(_.amount).sum - expenseTrans.filter(_.dateMonth.equals(monthIndex(xx))).map(_.amount).sum
+          case "Total Surplus" => incomeTrans.filter(_.dateMonth.equals(monthIndex(xx))).map(_.amount).sum + expenseTrans.filter(_.dateMonth.equals(monthIndex(xx))).map(_.amount).sum
         }
         Some(new CellData().setUserEnteredValue(new ExtendedValue().setNumberValue(total)).setUserEnteredFormat(format("line")))
       }

@@ -14,7 +14,7 @@ case class TransactionTab(transGridData: GridData, superCategories: Map[String, 
     val headers = transData.head.getValues.asScala.toList.flatMap { cd =>
       Option(cd.getUserEnteredValue).map(_.getStringValue)
     }
-    val rows = transData.zip(1 to transData.length).tail.filter(_._1.getValues.asScala.toList(headers.indexOf("Id")).getUserEnteredValue != null).map { case (rd, i) =>
+    val rows = transData.zipWithIndex.tail.filter(_._1.getValues.asScala.toList(headers.indexOf("Id")).getUserEnteredValue != null).map { case (rd, i) =>
       Transaction(headers, i, rd.getValues.asScala.toList)
     }
     val finalRows = rows.flatMap(x => adjust(x))
@@ -40,8 +40,9 @@ case class TransactionTab(transGridData: GridData, superCategories: Map[String, 
               }.padTo(dist.size, 0)
             }
           val amts = (1 to dist.size).map(_ => part).zip(diffDist).map(x => x._1 + x._2).map(_.toDouble / 100).zip(dist).map(_.swap)
-          val res = amts.map { d =>
-            Transaction(t.cells, true, t.rowNum, t.id, t.source, t.date.plusMonths(d._1), t.dateOverride, t.name, t.memo, d._2, t.adjustedAmount, t.portion, t.link, t.linkType, t.category, t.notes, t.tags, t.entity, t.city, t.stateProvince, t.country, t.paymentType, t.paymentAccount, t.bank, t.account, t.accountType, t.checkNumber, t.currency, t.transactionType, t.idType, t.amountUsed, t.dateUsed, t.yearUsed, t.monthUsed, t.location, t.lastUpdated, t.lastWritten, t.importFile)
+          val res = amts.map { case (monthOffset, amount) =>
+            if (monthOffset == 0) t.reinterpret.modifyField(Transaction.Fields.Amount, amount)
+            else t.virtualize.modifyField(Transaction.Fields.Date, t.date.plusMonths(monthOffset)).modifyField(Transaction.Fields.Amount, amount)
           }
           res.toList.filter(_.date.isBefore(LocalDate.now()))
         } else throw new Exception("unsupported adjustment")
