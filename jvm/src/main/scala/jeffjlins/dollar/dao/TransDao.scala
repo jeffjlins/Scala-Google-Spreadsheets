@@ -14,6 +14,7 @@ case class TransDao(conn: Sheets, fileId: String) extends SheetsDao {
     val transactions = Value("transactions")
     val scratch = Value("scratch")
     val assets = Value("assets")
+    val recurring = Value("recurring")
   }
 
   override def write(requests: List[Request]): List[Response] = super[SheetsDao].write(requests)
@@ -30,4 +31,6 @@ case class TransDao(conn: Sheets, fileId: String) extends SheetsDao {
   def assetsTabId(refreshCache: Boolean = false): Int = readTabId(TransFileTab.assets.toString, refreshCache)
   def assetsTabData(refreshCache: Boolean = false): GridData = readData(TransFileTab.assets.toString, refreshCache)
 
+  def recurringTabId(refreshCache: Boolean = false): Int = readTabId(TransFileTab.recurring.toString, refreshCache)
+  def recurringTabData(refreshCache: Boolean = false): GridData = readData(TransFileTab.recurring.toString, refreshCache)
 }

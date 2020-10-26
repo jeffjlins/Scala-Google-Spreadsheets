@@ -12,7 +12,7 @@ trait RuleAction {
 case class TransMutateRuleAction(rule: Rule, group: String, actions: List[TransMutateAction]) {
   def changeSet(trans: List[Transaction]): List[Transaction] = {
     val targets = trans.filter(rule.matches)
-    actions.flatMap(a => targets.map(a.operation))
+    targets.map(t => actions.foldLeft(t)((tt, a) => a.operation(tt)))
   }
 }
 

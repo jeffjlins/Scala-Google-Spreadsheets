@@ -1,7 +1,7 @@
 package jeffjlins.dollar
 
 import com.google.api.services.sheets.v4.SheetsScopes
-import jeffjlins.dollar.domain.{AssetsTab, DashboardTab, RulesTab, TransactionTab}
+import jeffjlins.dollar.domain.{AssetsTab, DashboardTab, RecurringTab, RulesTab, TransactionTab}
 import jeffjlins.dollar.dao.{FinanceAppDao, SheetsConnection, TransDao}
 
 object App {
@@ -13,11 +13,13 @@ object App {
   val assetsTab = AssetsTab(transDao.assetsTabData())
   val dashboardTab = DashboardTab(transTab, assetsTab, prefs.superCategories, prefs.detailPanelPrefs, prefs.datePanelPrefs, prefs.summaryPanelPrefs, prefs.assetsPanelPrefs)
   val rulesTab = RulesTab(financeAppDao.rulesTabData())
+  val recurringTab = RecurringTab(transTab, transDao.recurringTabData(), prefs.recurringDatePanelPrefs, prefs.recurringValuesPanelPrefs)
 
   def main(args: Array[String]): Unit = {
     args.headOption match {
       case Some("dashboard") => writeDashboard
       case Some("rules") => rules
+      case Some("recurring") => writeRecurring
       case Some("all") =>
         rules
         writeDashboard
@@ -40,9 +42,14 @@ object App {
         transChanges.map(_.getUpdateCells.getRange.getStartRowIndex).foreach(println)
         println("--------")
         resp.foreach(x => println(x.toPrettyString.length))
-        Thread.sleep(5000)
+        Thread.sleep(2000)
         println("========")
       }
+  }
+
+  def writeRecurring = {
+    val resp = transDao.write(recurringTab.writerModel(transDao.recurringTabId()) :: Nil)
+    resp.foreach(println)
   }
 
 }

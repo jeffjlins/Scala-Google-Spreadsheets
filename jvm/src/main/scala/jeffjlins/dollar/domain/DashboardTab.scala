@@ -8,7 +8,9 @@ import scala.jdk.CollectionConverters._
 case class DashboardTab(transTab: TransactionTab, assetsTab: AssetsTab, superCategories: Map[String, List[String]], detailPanelPrefs: List[DetailPanelPrefs], datePanelPrefs: BasicPanelPrefs, summaryPanelPrefs: BasicPanelPrefs, assetsPanelPrefs: BasicPanelPrefs) {
 
   lazy val panels: List[Panel] = {
-    val datePanel = DatePanel(Left(2), Left(0), transTab.allCats.flatMap(_.transactionsAll), datePanelPrefs.format)
+    val months = transTab.allCats.flatMap(_.transactionsAll).filter(_.deprecated == false).map(_.dateMonth).distinct.sorted.reverse
+
+    val datePanel = DatePanel(Left(2), Left(0), months, datePanelPrefs.format)
     val incomeTrans = superCategories("Income").flatMap(x => transTab.rowsAdjusted.filter(_.category.startsWith(x)))
     val expenseTrans = superCategories("Expenses").flatMap(x => transTab.rowsAdjusted.filter(_.category.startsWith(x)))
     val summaryPanel = SummaryPanel(Left(0), Right(datePanel), incomeTrans, expenseTrans, datePanel.months, summaryPanelPrefs.format)

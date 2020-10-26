@@ -60,12 +60,24 @@ class Preferences {
       "lineLabel" -> new CellFormat().setBackgroundColor(clr("#fff2cc")).setHorizontalAlignment("left").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
       "line" -> new CellFormat().setBackgroundColor(clr("#fff2cc")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
       "sum" -> new CellFormat().setBackgroundColor(clr("#bf9000")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#ffffff")).setBold(false))
-    )
+    ),
+    "recurring.values" -> Map(
+      "Pending" -> new CellFormat().setBackgroundColor(clr("#c9daf8")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
+      "Unpaid" -> new CellFormat().setBackgroundColor(clr("#f4cccc")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
+      "Fulfilled" -> new CellFormat().setBackgroundColor(clr("#d9ead3")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
+      "Late" -> new CellFormat().setBackgroundColor(clr("#fff2cc")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
+      "Rectified" -> new CellFormat().setBackgroundColor(clr("#fce5cd")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false))
+    ),
+    "recurring.date" -> Map(
+      "default" -> new CellFormat().setBackgroundColor(clr("#efefef")).setHorizontalAlignment("center").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false))
+    ),
   )
   val datePanelPrefs: BasicPanelPrefs = BasicPanelPrefs(formats("date"))
   val summaryPanelPrefs: BasicPanelPrefs = BasicPanelPrefs(formats("summary"))
   val assetsPanelPrefs: BasicPanelPrefs = BasicPanelPrefs(formats("assets"))
   val detailPanelPrefs: List[DetailPanelPrefs] = DetailPanelPrefs(formats("detail.reallocation"), "Reallocation", true, false) :: DetailPanelPrefs(formats("detail.income"), "Income", true, true) :: DetailPanelPrefs(formats("detail.expenseSummary"), "Expenses", false, true) :: DetailPanelPrefs(formats("detail.expense"), "Expenses", true, false, "Primary Expenses" :: "Avoidable Expenses" :: "Unavoidable Expenses" :: "Planned Expenses" :: "Unknown Expenses" :: Nil) :: Nil
+  val recurringDatePanelPrefs: BasicPanelPrefs = BasicPanelPrefs(formats("recurring.date"))
+  val recurringValuesPanelPrefs: BasicPanelPrefs = BasicPanelPrefs(formats("recurring.values"))
 
   def clr(hex: String): Color = Utils.hexToColor(hex)
 

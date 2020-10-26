@@ -1,6 +1,6 @@
 package jeffjlins.dollar.util
 
-import com.google.api.services.sheets.v4.model.{Color, Request}
+import com.google.api.services.sheets.v4.model.{CellData, Color, Request}
 import com.google.gson.GsonBuilder
 
 object Utils {
@@ -13,5 +13,10 @@ object Utils {
     val green = Integer.parseInt(hex.drop(3).take(2), 16).toFloat / Integer.parseInt("FF", 16).toFloat
     val blue = Integer.parseInt(hex.drop(5).take(2), 16).toFloat / Integer.parseInt("FF", 16).toFloat
     new Color().setRed(red).setGreen(green).setBlue(blue)
+  }
+  def cellsToHeaders(cells: List[CellData]) = {
+    cells.flatMap { cd =>
+      Option(cd.getUserEnteredValue).map(_.getStringValue)
+    }
   }
 }

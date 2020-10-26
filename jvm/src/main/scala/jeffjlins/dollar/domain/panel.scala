@@ -1,9 +1,12 @@
 package jeffjlins.dollar.domain
 
-import java.time.YearMonth
+import java.time.{DayOfWeek, LocalDate, Period, YearMonth}
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 import com.google.api.services.sheets.v4.model.{CellData, CellFormat, ExtendedValue}
+
+import cats.syntax.all._
 
 trait Panel {
   val xPlacement: Either[Int, Panel]
@@ -24,9 +27,8 @@ trait Panel {
   def getCell(x: Int, y: Int): Option[CellData]
 }
 
-case class DatePanel(xPlacement: Either[Int, Panel], yPlacement: Either[Int, Panel], trans: List[Transaction], format: Map[String, CellFormat]) extends Panel {
+case class DatePanel(xPlacement: Either[Int, Panel], yPlacement: Either[Int, Panel], months: List[YearMonth], format: Map[String, CellFormat]) extends Panel {
   private val monthFmt = DateTimeFormatter.ofPattern("yyyy-MM")
-  val months = trans.map(_.dateMonth).distinct.sorted.reverse
   override val width: Int = months.length
   override val height: Int = 1
 
@@ -207,3 +209,22 @@ case class DetailPanel(xPlacement: Either[Int, Panel], yPlacement: Either[Int, P
   }
 }
 
+case class RecurringValuesPanel(xPlacement: Either[Int, Panel], yPlacement: Either[Int, Panel], recr: List[Recurring], firstMonth: YearMonth, lastMonth: YearMonth, format: Map[String, CellFormat]) extends Panel {
+//  private val firstMonth = months.sortWith((a, b) => a.isBefore(b)).head
+//  private val lastMonth = months.sortWith((a, b) => a.isBefore(b)).reverse.head
+  private val monthIdx = (0L to ChronoUnit.MONTHS.between(firstMonth, lastMonth)).map(firstMonth.plusMonths(_)).zipWithIndex.map(m => (m._2 + x) -> m._1).toMap
+  private val recurringIdx = recr.map(r => r.rowNum -> r).toMap
+
+  val height = recr.length
+  val width = monthIdx.size
+
+  override def getCell(xx: Int, yy: Int): Option[CellData] = {
+    val validRange = yy >= y && yy < y + height && xx >= x && xx < x + width
+    if (validRange) {
+      (recurringIdx(yy).adjustedAmount(monthIdx(xx)), recurringIdx(yy).status(monthIdx(xx))) match {
+        case (Some(adjAmt), Some(status)) => Some(new CellData().setUserEnteredValue(new ExtendedValue().setNumberValue(adjAmt)).setUserEnteredFormat(format(status.entryName)))
+        case _ => None
+      }
+    } else None
+  }
+}

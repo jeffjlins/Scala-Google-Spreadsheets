@@ -3,6 +3,7 @@ package jeffjlins.dollar.domain
 import java.time.LocalDate
 
 import com.google.api.services.sheets.v4.model.GridData
+import jeffjlins.dollar.util.Utils
 
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
@@ -11,9 +12,7 @@ case class TransactionTab(transGridData: GridData, superCategories: Map[String, 
 
   lazy val (header, rows, rowsAdjusted) = {
     val transData = transGridData.getRowData.asScala.toList
-    val headers = transData.head.getValues.asScala.toList.flatMap { cd =>
-      Option(cd.getUserEnteredValue).map(_.getStringValue)
-    }
+    val headers = Utils.cellsToHeaders(transData.head.getValues.asScala.toList)
     val rows = transData.zipWithIndex.tail.filter(_._1.getValues.asScala.toList(headers.indexOf("Id")).getUserEnteredValue != null).map { case (rd, i) =>
       Transaction(headers, i, rd.getValues.asScala.toList)
     }

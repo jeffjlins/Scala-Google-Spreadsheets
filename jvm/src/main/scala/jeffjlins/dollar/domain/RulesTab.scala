@@ -25,7 +25,7 @@ case class RulesTab(rulesGridData: GridData) {
     val actionList: List[Action] = rows.filter(_(headers.indexOf("Type")).getUserEnteredValue.getStringValue == "Action").map { cells =>
       (cells(headers.indexOf("Form")).getUserEnteredValue.getStringValue) match {
         case "Set Fields" => SetFieldsAction(headers, cells, Some(new CellFormat().setBackgroundColor(Utils.hexToColor("#eaf1dd"))))
-        case "Recurring Entry" => RecurringAction(headers, cells)
+        //case "Recurring Entry" => RecurringAction(headers, cells)
         case x => throw new Exception("Rule type of " + x + " not recognized")
       }
     }
@@ -37,17 +37,26 @@ case class RulesTab(rulesGridData: GridData) {
     case _ => None
   }
 
-  val recurringQualifiers: List[RecurringAction] = actions.flatMap {
-    case (x: RecurringAction) => Some(x)
-    case _ => None
-  }
+//  val recurringQualifiers: List[RecurringAction] = actions.flatMap {
+//    case (x: RecurringAction) => Some(x)
+//    case _ => None
+//  }
 
   val transMutationOps: List[TransMutateRuleAction] = createTransMutationOps(transMutations, rules)
   protected def createTransMutationOps(mutations: List[TransMutateAction], allRules: List[Rule]) = mutations.groupBy(_.group).map(a => TransMutateRuleAction(allRules.find(_.group == a._1).get, a._1, a._2)).toList
 
   def writerModelTrans(sheetId: Int, trans: List[Transaction]): List[Request] = writerModelTrans(sheetId, trans, transMutationOps)
   protected def writerModelTrans(sheetId: Int, trans: List[Transaction], mutations: List[TransMutateRuleAction]): List[Request] = {
-    val changes = mutations.flatMap(_.changeSet(trans)).groupBy(_.id).map(_._2.head).toList
+//    val weaveMutation = mutations.filter(_.group == "Weaveworks").head
+//    val weaveTrans = trans(850)
+//    val a1 = weaveMutation.actions.head.operation(weaveTrans)
+//    val a2 = weaveMutation.actions.tail.head.operation(weaveTrans)
+
+    val changes: List[Transaction] = mutations.foldLeft(trans) { (ts, mut) =>
+      val cs = mut.changeSet(ts)
+      cs ++ ts.filterNot(t => cs.exists(_.id == t.id))
+    }
+    //val changes = mutations.flatMap(_.changeSet(trans)).groupBy(_.id).map(_._2.head).toList
     changes.flatMap { t =>
       t.changedFields.map { dc =>
         val req = new UpdateCellsRequest()

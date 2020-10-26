@@ -38,6 +38,8 @@ lazy val gs = crossProject(JSPlatform, JVMPlatform)
         "com.google.apis" % "google-api-services-sheets" % "v4-rev612-1.25.0",
         "com.google.code.gson" % "gson" % "2.8.6",
         "org.typelevel" %% "cats-core" % "2.0.0",
+        //"io.chrisdavenport" %% "cats-time" % "4.0.0",
+        "com.beachape" %% "enumeratum" % "1.6.1",
         "org.scalatest" %% "scalatest" % "3.2.2" % Test,
       )
     )
