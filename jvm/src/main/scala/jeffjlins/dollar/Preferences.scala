@@ -63,10 +63,12 @@ class Preferences {
     ),
     "recurring.values" -> Map(
       "Pending" -> new CellFormat().setBackgroundColor(clr("#c9daf8")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
-      "Unpaid" -> new CellFormat().setBackgroundColor(clr("#f4cccc")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
+      "Underpaid" -> new CellFormat().setBackgroundColor(clr("#f4cccc")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
       "Fulfilled" -> new CellFormat().setBackgroundColor(clr("#d9ead3")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
       "Late" -> new CellFormat().setBackgroundColor(clr("#fff2cc")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
-      "Rectified" -> new CellFormat().setBackgroundColor(clr("#fce5cd")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false))
+      "Rectified" -> new CellFormat().setBackgroundColor(clr("#fce5cd")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
+      "NotApplicable" -> new CellFormat().setBackgroundColor(clr("#f3f3f3")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false)),
+      "Overpaid" -> new CellFormat().setBackgroundColor(clr("#b6d7a8")).setHorizontalAlignment("right").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false))
     ),
     "recurring.date" -> Map(
       "default" -> new CellFormat().setBackgroundColor(clr("#efefef")).setHorizontalAlignment("center").setTextFormat(new TextFormat().setForegroundColor(clr("#000000")).setBold(false))

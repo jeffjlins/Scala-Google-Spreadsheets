@@ -32,10 +32,13 @@ sealed trait RecurringStatus extends EnumEntry
 object RecurringStatus extends Enum[RecurringStatus] {
   val values = findValues
   case object Pending extends RecurringStatus // blue
-  case object Unpaid extends RecurringStatus // red
+  //or underpaid
+  case object Underpaid extends RecurringStatus // red
   case object Fulfilled extends RecurringStatus // green
   case object Late extends RecurringStatus // yellow
   case object Rectified extends RecurringStatus // orange
+  case object NotApplicable extends RecurringStatus // light grey
+  case object Overpaid extends RecurringStatus
 }
 
 sealed trait RecurringField extends EnumEntry
@@ -89,6 +92,7 @@ trait RecurringFromSheet extends Recurring {
 
 trait RecurringWithTrans extends Recurring {
   val trans: List[Transaction]
+  // prevStatuses: List[RecurringStatus]
 
   def amount(month: YearMonth): Option[Double] = {
     months.find(_ == month).flatMap { _ =>
@@ -100,9 +104,20 @@ trait RecurringWithTrans extends Recurring {
       NonEmptyList.fromList(trans.filter(_.dateMonth == month).filter(_.deprecated == false).map(_.amount)).map(_.combineAll)
     }
   }
-  def status(month: YearMonth): Option[RecurringStatus] = {
+  def status(month: YearMonth): Option[RecurringStatus] = { //non-optional
     def onTime(ts: List[Transaction]) = ts.map(_.date).forall { d =>
       // when day paid is before the range it should go into last month but that should be done at rules time through an overlay
+      //rewrite
+      (when, range) match {
+        case (When(Some(dow), Some(nwd), _, _), DayRange(_, da, wm)) =>
+        case (When(_, _, Some(dom), _), DayRange(_, da, wm)) =>
+        case (When(_, _, _, Some(doy)), DayRange(_, da, wm)) =>
+          if (start.getMonthValue == month.getMonthValue) {
+
+          } else true
+
+      }
+      //original
       (when.dayOfWeek, when.nthWeekDay, when.dayOfMonth, range.daysAfter, range.withinMonth) match {
         case (Some(dow), Some(nwd), _, da, wm) =>
           val target = month.atDay(1).`with`(TemporalAdjusters.dayOfWeekInMonth(nwd, dow))
@@ -120,27 +135,48 @@ trait RecurringWithTrans extends Recurring {
       }
     }
 
-    val monthInRange = month.isBefore(months.min)
+    sealed trait RangePosition extends EnumEntry
+    object RangePosition extends Enum[RangePosition] {
+      val values = findValues
+      case object Below extends RangePosition
+      case object Inside extends RangePosition
+      case object Above extends RangePosition
+    }
+
+    // closed
+
+    // val lastFulfilledMonth: YearMonth
+    // val monthInRange: Boolean
+    // val origAmountInRange: RangePosition
+    // val adjAmountInRange: RangePosition
+
+    // paymentDue = uses lastFulfilledMonth and When and start (the new onTime function)
+
+    // pending
+
+    // (closed, paymentDue, pending, ...) match // still need late (paid in this month but past the day range) and rectified (not paid this month originally but then paid later), probably combine these into same status
+
+    val monthInRange = month.isAfter(months.min.minusMonths(1)) && month.isBefore(months.max.plusMonths(1))
     val paymentMonth = monthInRange && when.monthOfYear.forall(_ == month.getMonthValue)
     val pendingMonth = months.max == month
     val origTrans = trans.filter(_.dateMonth == month).filter(_.overlay == false)
     val origOnTime = onTime(origTrans)
     val origAmt: Double = NonEmptyList.fromList(origTrans.map(_.amount)).map(_.combineAll).getOrElse(0.0)
-    val origPaid = origAmt >= min
-    val origOverpaid = origAmt > max
+    val origAmtFulfilled = if (min < 0) origAmt <= min else origAmt >= min
+    val origOver = if (max < 0) origAmt <= max else origAmt >= max
     val adjTrans = trans.filter(_.dateMonth == month).filter(_.deprecated == false)
     val adjOnTime = onTime(adjTrans)
     val adjAmt: Double = NonEmptyList.fromList(adjTrans.map(_.amount)).map(_.combineAll).getOrElse(0.0)
-    val adjPaid = origAmt >= min
-    val adjOverpaid = origAmt > max
+    val adjAmtFulfilled = if (min < 0) adjAmt <= min else adjAmt >= min
+    val adjOver = if (max < 0) adjAmt <= max else adjAmt >= max
 
-    (monthInRange, pendingMonth, origOnTime, origPaid, adjOnTime, adjPaid) match {
+    (monthInRange, pendingMonth, origOnTime, origAmtFulfilled, adjOnTime, adjAmtFulfilled) match {
       case (false, _, _, _, _, _) => None
       case (_, _, true, true, _, _) => RecurringStatus.Fulfilled.some
+      case (_, _, false, true, _, _) => RecurringStatus.Late.some
       case (_, _, _, false, _, true) => RecurringStatus.Rectified.some
       case (_, true, _, _, _, _) => RecurringStatus.Pending.some
-      case (_, _, _, _, false, false) => RecurringStatus.Unpaid.some
-      case (_, _, false, true, _, _) => RecurringStatus.Late.some
+      case (_, _, _, false, _, false) => RecurringStatus.Underpaid.some
       case _ => None
     }
 

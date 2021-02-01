@@ -1,9 +1,11 @@
-package jeffjlins.dollar.domain
+package jeffjlins.dollar.presentation
 
 import com.google.api.services.sheets.v4.model._
+import jeffjlins.dollar.domain._
 import jeffjlins.dollar.{BasicPanelPrefs, DetailPanelPrefs}
 
 import scala.jdk.CollectionConverters._
+import cats.syntax.all._
 
 case class DashboardTab(transTab: TransactionTab, assetsTab: AssetsTab, superCategories: Map[String, List[String]], detailPanelPrefs: List[DetailPanelPrefs], datePanelPrefs: BasicPanelPrefs, summaryPanelPrefs: BasicPanelPrefs, assetsPanelPrefs: BasicPanelPrefs) {
 

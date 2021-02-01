@@ -1,14 +1,15 @@
-package jeffjlins.dollar.domain
+package jeffjlins.dollar.presentation
 
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-import com.google.api.services.sheets.v4.model.{CellData, GridData, GridRange, Request, RowData, UpdateCellsRequest}
+import com.google.api.services.sheets.v4.model._
 import jeffjlins.dollar.BasicPanelPrefs
-import cats.implicits._
+import jeffjlins.dollar.domain._
 import jeffjlins.dollar.util.Utils
 
 import scala.jdk.CollectionConverters._
+import cats.syntax.all._
 
 case class RecurringTab(transTab: TransactionTab, recurringGridData: GridData, datePanelPrefs: BasicPanelPrefs, recurringValuesPanelPrefs: BasicPanelPrefs) {
   private val defCols = 8
@@ -22,14 +23,15 @@ case class RecurringTab(transTab: TransactionTab, recurringGridData: GridData, d
 
   lazy val panels: List[Panel] = createPanels(firstMonth, lastMonth)
   protected def createPanels(fMonth: YearMonth, lMonth: YearMonth): List[Panel] = {
-    val months: List[YearMonth] = (0L to ChronoUnit.MONTHS.between(firstMonth, lastMonth)).map(firstMonth.plusMonths(_)).toList
+    val months: List[YearMonth] = (0L to ChronoUnit.MONTHS.between(firstMonth, lastMonth)).map(firstMonth.plusMonths(_)).toList.sorted.reverse
 
     val rows = recurringGridData.getRowData.asScala.toList.zipWithIndex.map(_.swap)
     val headers = Utils.cellsToHeaders(rows.head._2.getValues.asScala.toList.take(defCols))
-    val headerIdx = headers.zipWithIndex.toMap
+    val headerIdx: Map[String, Int] = headers.zipWithIndex.toMap
 
-    val recs = rows.filter(_._2.getValues.asScala.toList(headers.indexOf("Name")).getUserEnteredValue != null).tail.map { rd =>
-      val name = rd._2.getValues.asScala.toList(headerIdx(RecurringField.Name.entryName))
+    val nameColNum = headerIdx(RecurringField.Name.entryName)
+    val recs = rows.filter(_._2.getValues.asScala.toList(nameColNum).getUserEnteredValue != null).tail.map { rd =>
+      val name = rd._2.getValues.asScala.toList(nameColNum).getUserEnteredValue.getStringValue
       RecurringFromSheetWithTrans(DDCell.create(headers, rd._2.getValues.asScala.toList.take(defCols), RecurringField), rd._1, months, trans.filter(_.recurring.exists(_ == name)))
     }
 
@@ -54,7 +56,7 @@ case class RecurringTab(transTab: TransactionTab, recurringGridData: GridData, d
     }.asJava
   }
 
-  def writerModel(sheetId: Int): Request = writerModel(sheetId, grid, defCols + 1, 0, width, height)
+  def writerModel(sheetId: Int): Request = writerModel(sheetId, grid, defCols, 0, width, height)
   protected def writerModel(sheetId: Int, gridData: java.util.List[RowData], x: Int, y: Int, w: Int, h: Int): Request = {
     val req = new UpdateCellsRequest()
       .setRows(gridData)

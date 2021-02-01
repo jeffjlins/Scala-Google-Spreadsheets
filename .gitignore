@@ -9,3 +9,8 @@ project/target
 jvm/src/main/resources/credentials.json
 
 tokens
+
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store

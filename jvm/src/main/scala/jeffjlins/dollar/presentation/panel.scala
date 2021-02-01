@@ -1,12 +1,11 @@
-package jeffjlins.dollar.domain
+package jeffjlins.dollar.presentation
 
-import java.time.{DayOfWeek, LocalDate, Period, YearMonth}
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 import com.google.api.services.sheets.v4.model.{CellData, CellFormat, ExtendedValue}
-
-import cats.syntax.all._
+import jeffjlins.dollar.domain.{AssetsTab, Recurring, Transaction, TransactionCat}
 
 trait Panel {
   val xPlacement: Either[Int, Panel]
@@ -212,7 +211,7 @@ case class DetailPanel(xPlacement: Either[Int, Panel], yPlacement: Either[Int, P
 case class RecurringValuesPanel(xPlacement: Either[Int, Panel], yPlacement: Either[Int, Panel], recr: List[Recurring], firstMonth: YearMonth, lastMonth: YearMonth, format: Map[String, CellFormat]) extends Panel {
 //  private val firstMonth = months.sortWith((a, b) => a.isBefore(b)).head
 //  private val lastMonth = months.sortWith((a, b) => a.isBefore(b)).reverse.head
-  private val monthIdx = (0L to ChronoUnit.MONTHS.between(firstMonth, lastMonth)).map(firstMonth.plusMonths(_)).zipWithIndex.map(m => (m._2 + x) -> m._1).toMap
+  private val monthIdx = (0L to ChronoUnit.MONTHS.between(firstMonth, lastMonth)).map(firstMonth.plusMonths(_)).sorted.reverse.zipWithIndex.map(m => (m._2 + x) -> m._1).toMap
   private val recurringIdx = recr.map(r => r.rowNum -> r).toMap
 
   val height = recr.length
@@ -223,6 +222,7 @@ case class RecurringValuesPanel(xPlacement: Either[Int, Panel], yPlacement: Eith
     if (validRange) {
       (recurringIdx(yy).adjustedAmount(monthIdx(xx)), recurringIdx(yy).status(monthIdx(xx))) match {
         case (Some(adjAmt), Some(status)) => Some(new CellData().setUserEnteredValue(new ExtendedValue().setNumberValue(adjAmt)).setUserEnteredFormat(format(status.entryName)))
+        case (None, Some(status)) => Some(new CellData().setUserEnteredValue(null).setUserEnteredFormat(format(status.entryName)))
         case _ => None
       }
     } else None

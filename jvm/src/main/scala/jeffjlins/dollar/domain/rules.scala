@@ -17,6 +17,7 @@ trait Rule {
 case class OrExpressionRule(cells: List[CellData], group: String, anyMatchTerms: List[String], exactMatchTerms: List[String], leftMatchTerms: List[String], rightMatchTerms: List[String]) extends Rule {
   def matches(t: Transaction): Boolean = {
     val i = (t.memo :: t.name.some :: t.memo.map(m => t.name + m) :: Nil).flatten
+    //println(anyMatchTerms + " - \"" + i + "\"");
     val any = anyMatchTerms.exists(m => i.exists(_.indexOf(m) >= 0))
     val left = leftMatchTerms.exists(m => i.startsWith(m))
     val right = rightMatchTerms.exists(m => i.endsWith(m))

@@ -1,8 +1,9 @@
 package jeffjlins.dollar
 
 import com.google.api.services.sheets.v4.SheetsScopes
-import jeffjlins.dollar.domain.{AssetsTab, DashboardTab, RecurringTab, RulesTab, TransactionTab}
+import jeffjlins.dollar.domain.{AssetsTab, RulesTab, TransactionTab}
 import jeffjlins.dollar.dao.{FinanceAppDao, SheetsConnection, TransDao}
+import jeffjlins.dollar.presentation.{DashboardTab, RecurringTab}
 
 object App {
   val prefs = new Preferences()

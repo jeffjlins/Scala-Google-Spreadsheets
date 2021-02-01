@@ -35,11 +35,12 @@ case class Transaction(cells: List[DCell], rowNum: Option[Int], deprecated: Bool
   val accountType: String = uev(Fields.AccountType)
   val checkNumber: Option[Double] = uev(Fields.CheckNumber)
   val currency: String = uev(Fields.Currency)
-  val transactionType: String = uev(Fields.TransactionType)
+  val transactionType: Option[String] = uev(Fields.TransactionType)
   val idType: String = uev(Fields.IdType)
   val lastUpdated: String = uev(Fields.LastUpdated)
-  val lastWritten: String = uev(Fields.LastWritten)
+  val created: String = uev(Fields.Created)
   val importFile: Option[String] = uev(Fields.ImportFile)
+  val exportId: Option[String] = uev(Fields.ExportId)
 
   val dateMonth = YearMonth.from(date)
   val modified: Boolean = cells.exists(_.changed)
@@ -105,8 +106,9 @@ object Transaction {
     val TransactionType = Value("Transaction Type")
     val IdType = Value("ID Type")
     val LastUpdated = Value("Last Updated")
-    val LastWritten = Value("Last Written")
+    val Created = Value("Created")
     val ImportFile = Value("Import File")
+    val ExportId = Value("Export ID")
   }
 
   def apply(cols: List[String], rowNum: Int, cells: List[CellData]): Transaction = {
